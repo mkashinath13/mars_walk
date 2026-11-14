@@ -81,7 +81,6 @@ MARSWALK is a prototype for exploration and education. Keep these limitations in
 mars_walk/
 ├── index.html          # Single-page application
 ├── mola_grid.json      # Reduced, coarse MOLA elevation grid
-├── make_mola_grid.py   # Script used to create the reduced grid
 └── README.md
 ```
 
