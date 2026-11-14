@@ -1,153 +1,97 @@
-MARSWALK
-An Interplanetary Survival Guide --- Martian Map
-MARSWALK is a browser-based Mars exploration planning tool created for
-the NASA Space Apps Challenge 2026 challenge, "Interplanetary
-Survival Guide: Martian Map."
+<div align="center">
 
-It lets users choose locations on a real Mars map, plan a direct route,
-and explore regional elevation information. It also makes the limits of
-the available data clear: a route on the map is not a safety
-recommendation.
-Project status: Prototype. Some NASA Trek map-layer endpoints
-still need to be tested in the target browser. Read the limitations
-below before interpreting the results.
+# 🔴 MARSWALK
 
-Screenshots
-Add screenshots of the working application to the screenshots/
-folder, then replace the placeholders below with the matching image
-paths.
-1. Main map and route planner
-<!-- Replace with: ![MARSWALK main map](screenshots/main-map.png) -->
-Screenshot placeholder: Main map showing the selected start,
-waypoints, destination, and route.
-2. Elevation profile
-<!-- Replace with: ![MARSWALK elevation profile](screenshots/elevation-profile.png) -->
-Screenshot placeholder: Elevation profile showing regional elevation
-and route statistics.
-3. Mission briefing
-<!-- Replace with: ![MARSWALK mission briefing](screenshots/mission-briefing.png) -->
-Screenshot placeholder: Generated briefing with route details and
-data limitations.
-Features
-- Mars map: Leaflet displays the Viking colour mosaic from NASA
-  Trek. If the imagery cannot load, the app falls back to a
-  latitude/longitude grid and reports that fallback in the status
-  line.
-- Route planning: Click the map to add a start point, waypoints,
-  and a destination.
-- Great-circle distance: Route distance is calculated along a
-  spherical Mars model using a mean radius of 3,389.5 km. Routes
-  crossing the map edge are drawn across the edge correctly.
-- Elevation profile: Uses a coarse MOLA elevation grid to show the
-  elevation range, total climb and descent, steepest regional
-  gradient, and an estimated walking time.
-- Map layers: Imagery, MOLA relief, coordinate grid, landmarks,
-  and routes. A CRISM minerals layer slot exists, but CRISM data is
-  not currently integrated.
-- Science landmarks: Explore six reference locations: Jezero,
-  Gale, Olympus Mons, Valles Marineris, Hellas, and Gusev.
-- Search: Search by landmark name or coordinates, for example
-  18.4, 77.6.
-- Mission briefing: Generate a route briefing and print it to PDF
-  or export route information as JSON or CSV.
-- Saved routes: Routes can be saved in the browser.
-- Convenience options: Switch between kilometres and miles, choose
-  between two coordinate formats, and load example routes.
-Data sources
-  Data                    Source                  How MARSWALK uses it
-  Mars imagery            Viking MDIM 2.1 colour  Base map imagery
-mosaic via NASA Trek    
+### Plan a path across the Red Planet.
 
-  Relief tiles            MGS MOLA via NASA Trek  Optional relief map
-layer; exact layer
-configuration still
-needs verification
+An interactive Mars exploration workspace for mapping destinations, planning direct routes, and exploring regional elevation—with the data’s limitations clearly in view.
 
-  Elevation values        MGS MOLA topography     Reduced to a coarse
-from USGS / PDS         mola_grid.json file,
-approximately 30 km per
-cell
-Landmarks               Approximate IAU         Reference points and
-reference coordinates   short science
-descriptions
-The app does not use live rover telemetry or live Mars weather data.
-Important scientific limitations
-MARSWALK is an exploration-planning aid and educational prototype. It
-does not determine whether a route is safe.
-- A route is a direct great-circle path. It is not terrain-aware
-  navigation.
-- The elevation grid is coarse, at approximately 30 km per cell. It
-  cannot represent local slopes, boulders, small craters, or other
-  small-scale hazards.
-- Walking time is an estimate based on an assumed pace and a
-  flat-ground assumption. It is not a prediction of actual travel
-  time.
-- The steepest gradient is regional and depends on the resolution of
-  the elevation grid. It should not be interpreted as a rover-scale or
-  human-scale slope measurement.
-- The NASA Trek imagery and relief tile addresses have not yet been
-  fully verified in the target browser. If imagery fails, the app
-  should show its grid fallback and status message.
-- CRISM minerals data is not integrated; its layer slot is only a
-  placeholder.
-- Landmark coordinates are approximate reference coordinates.
-Please do not use MARSWALK output as operational guidance for a real
-crewed or robotic mission.
-Run locally
-You need Python 3 installed. No backend or package installation is
-required for the described local workflow.
-1. Put index.html and mola_grid.json in the same project folder.
-2. Open a terminal in that folder.
-3. Start a local static web server:
+[**Launch MARSWALK**](https://mkashinath13.github.io/mars_walk/) · [View the source](https://github.com/mkashinath13/mars_walk)
+
+Built for the **NASA Space Apps Challenge 2026** · *Interplanetary Survival Guide: Martian Map*
+
+</div>
+
+---
+
+## About
+
+MARSWALK is a browser-based Mars route-planning prototype. Choose a starting point, add waypoints, and set a destination on a Mars map. Explore a coarse elevation profile and create a mission briefing to help understand the route.
+
+> **Important:** MARSWALK is an educational exploration tool—not a navigation system or safety assessment. A direct route is not necessarily traversable or safe.
+
+## What you can do
+
+- **Explore Mars:** View a Viking colour mosaic map, with a coordinate-grid fallback if imagery is unavailable.
+- **Plan a route:** Select a start, add waypoints, and choose a destination.
+- **Review distance:** See great-circle distance calculated using a mean Mars radius of 3,389.5 km.
+- **Inspect regional elevation:** View a coarse MOLA-based profile, elevation range, estimated climb and descent, and regional gradient.
+- **Find places:** Search landmarks or coordinates, or explore six reference locations: Jezero, Gale, Olympus Mons, Valles Marineris, Hellas, and Gusev.
+- **Create a briefing:** Print a mission briefing or export route data as JSON or CSV.
+- **Save and customize:** Save routes in your browser, switch between kilometres and miles, choose a coordinate format, and load example routes.
+- **Toggle map layers:** Explore imagery, MOLA relief, the coordinate grid, landmarks, and routes. The CRISM layer is a placeholder; CRISM data is not integrated.
+
+## Try the live project
+
+Open **[mkashinath13.github.io/mars_walk](https://mkashinath13.github.io/mars_walk/)** in your browser. No installation or account is required.
+
+## Run locally
+
+You’ll need Python 3. The app is a static website and does not require a backend or package installation.
+
+1. Clone or download this repository.
+2. Open a terminal in the project directory.
+3. Start a local web server:
+
+   ```bash
    python -m http.server 8000
-4. Open this address in your browser:
-   http://localhost:8000
-Use the local server rather than double-clicking index.html. Browsers
-can block the elevation file when the page is opened directly from the
-filesystem.
-Deploy with GitHub Pages
-1. Create a GitHub repository for the project.
-2. Upload index.html and mola_grid.json to the repository.
-3. Add this README.md and any screenshots you want to show.
-4. In the repository settings, enable GitHub Pages for the branch
-   and folder containing index.html.
-5. Open the published Pages URL and test the map, elevation profile,
-   route planner, and exports.
-Do not upload the original 2 GB source elevation file. The app uses
-the reduced mola_grid.json file.
-Project files
-MARSWALK/
-├── index.html          # Complete single-page application
-├── mola_grid.json      # Reduced, coarse MOLA elevation grid
-├── make_mola_grid.py   # Script used to create mola_grid.json
-├── README.md           # Project documentation
-└── screenshots/        # Optional screenshots for this README
-Example screenshot folder:
-screenshots/
-├── main-map.png
-├── elevation-profile.png
-└── mission-briefing.png
-Project goal
-An astronaut needs to travel from a landing site to a science target.
-MARSWALK displays a planned route on Mars imagery, uses MOLA elevation
-data to show regional climbs and gradients, and clearly communicates
-what the available data cannot tell us.
+   ```
 
-MARSWALK does not claim that a direct route is safe. It helps users
-explore the map and understand the terrain data---with its limitations
-in view.
-Challenge
-- Event: NASA Space Apps Challenge 2026
-- Challenge: Interplanetary Survival Guide: Martian Map
-- Project: MARSWALK
-Add your team name, contributor names, repository URL, and deployed
-demo URL here when they are available.
-Credits and references
-- NASA Trek --- Mars map and planetary data viewer:
-  https://trek.nasa.gov/
-- USGS Astrogeology --- planetary data and mapping resources:
-  https://astrogeology.usgs.gov/
-- NASA Planetary Data System (PDS): https://pds.nasa.gov/
-- NASA Space Apps Challenge: https://www.spaceappschallenge.org/
-Check the relevant dataset documentation and attribution requirements
-when preparing the final public submission.
+4. Visit [http://localhost:8000](http://localhost:8000).
+
+Use a local server instead of opening `index.html` directly; browsers may block the elevation data file when loaded from the filesystem.
+
+## Data and sources
+
+| Data | Source | Use in MARSWALK |
+| --- | --- | --- |
+| Mars imagery | Viking MDIM 2.1 colour mosaic via [NASA Trek](https://trek.nasa.gov/) | Base map |
+| Relief tiles | MGS MOLA via NASA Trek | Optional relief layer; tile configuration may need verification |
+| Elevation grid | MGS MOLA topography from [USGS / PDS](https://pds.nasa.gov/) | Reduced grid at approximately 30 km per cell |
+| Landmarks | Approximate IAU reference coordinates | Reference points and short descriptions |
+
+MARSWALK does **not** use live rover telemetry or live Mars weather data. The original source elevation file is not included; the app uses the reduced `mola_grid.json` file.
+
+## Limitations
+
+MARSWALK is a prototype for exploration and education. Keep these limitations in mind when interpreting its results:
+
+- Routes are direct great-circle paths, not terrain-aware navigation.
+- The elevation grid is coarse (approximately 30 km per cell) and cannot show local slopes, boulders, small craters, or other small-scale hazards.
+- Walking time is an estimate based on an assumed pace and flat-ground conditions; it is not a prediction of actual travel time.
+- The reported steepest gradient is regional and depends on grid resolution. It is not a rover-scale or human-scale slope measurement.
+- NASA Trek imagery and relief tile endpoints may not work in every browser or environment. If imagery fails, the app is intended to show a coordinate-grid fallback and a status message.
+- CRISM minerals data is not integrated, and landmark coordinates are approximate.
+
+**Do not use MARSWALK output as operational guidance for a real crewed or robotic mission.**
+
+## Project files
+
+```text
+mars_walk/
+├── index.html          # Single-page application
+├── mola_grid.json      # Reduced, coarse MOLA elevation grid
+├── make_mola_grid.py   # Script used to create the reduced grid
+└── README.md
+```
+
+## Challenge and credits
+
+Created for the [NASA Space Apps Challenge](https://www.spaceappschallenge.org/) challenge **“Interplanetary Survival Guide: Martian Map.”**
+
+- [NASA Trek](https://trek.nasa.gov/) — Mars map and planetary data viewer
+- [USGS Astrogeology](https://astrogeology.usgs.gov/) — planetary data and mapping resources
+- [NASA Planetary Data System](https://pds.nasa.gov/)
+- [NASA Space Apps Challenge](https://www.spaceappschallenge.org/)
+
+Please consult the original dataset documentation for full attribution and usage details.
