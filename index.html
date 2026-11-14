@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>MARSWALK</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<!-- Leaflet (real map library), pinned version -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{color-scheme:dark;--bg:#171615;--side:#121211;--p:#211F1D;--p2:#272421;--b:#38332E;--t:#EEE9E2;--t2:#9B9288;--o:#E49A51;--o2:#F0A45A;--g:#48B88A;--y:#E9B84C;--r:#DB6554;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--t);font:14px 'DM Sans',system-ui,sans-serif}
+h1,h2,h3,.h{font-family:'Space Grotesk','DM Sans',sans-serif;font-weight:500;margin:0}
+button,input,select{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside{background:var(--side);border-right:1px solid var(--b);padding:20px 14px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+.logo{font:600 22px 'Space Grotesk';letter-spacing:.12em;padding:4px 10px 18px;color:var(--o2)}
+.nav{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;border:1px solid transparent;background:none;color:var(--t2);cursor:pointer;text-align:left;width:100%}
+.nav:hover{color:var(--t)}.nav.on{background:rgba(228,154,81,.12);border-color:rgba(228,154,81,.4);color:var(--t)}
+.nav svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6}
+.sp{flex:1}.help{background:#000;border-radius:14px;padding:14px;color:var(--t2);font-size:12px}
+main{padding:22px 28px 40px;min-width:0}
+header{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:20px}
+header h1{font-size:30px}.sub{color:var(--t2);font-size:12px;margin-top:4px}
+.tools{display:flex;gap:10px;align-items:center;position:relative}
+.search{background:var(--p);border:1px solid var(--b);border-radius:12px;padding:10px 14px;width:260px}
+.results{position:absolute;top:46px;left:0;width:300px;background:var(--p2);border:1px solid var(--b);border-radius:12px;z-index:2000;display:none;overflow:hidden}
+.results button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 14px;cursor:pointer}.results button:hover{background:var(--p)}
+.chip{font-size:11px;padding:6px 10px;border-radius:99px;border:1px solid var(--b);color:var(--t2)}
+.chip.w{color:var(--y);border-color:rgba(233,184,76,.4)}
+.card{background:var(--p);border:1px solid var(--b);border-radius:20px;padding:18px;min-width:0}
+.card h3{font-size:17px;margin-bottom:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.stat .v{font:500 28px 'Space Grotesk';margin:8px 0 2px}.stat .d{color:var(--t2);font-size:12px}.stat .l{color:var(--t2);font-size:13px}
+.two{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(280px,1fr);gap:16px;margin-bottom:16px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mapwrap{position:relative;background:#0e0d0c;border-radius:14px;overflow:hidden;border:1px solid var(--b)}
+#map{width:100%;height:460px;background:#0e0d0c;cursor:crosshair}
+/* Leaflet dark-theme touches */
+.leaflet-container{background:#0e0d0c;font-family:'DM Sans',system-ui,sans-serif}
+.leaflet-control-zoom a{background:var(--p2);color:var(--t);border-color:var(--b)}
+.leaflet-control-attribution{background:rgba(18,18,17,.8)!important;color:var(--t2)!important}
+.leaflet-control-attribution a{color:var(--o2)!important}
+.lbl{background:none;border:0;box-shadow:none;color:#EEE9E2;font-size:12px;padding:0}
+.lbl::before{display:none}
+.gl{color:#6d655d;font-size:11px;white-space:nowrap;pointer-events:none}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;color:var(--t2);font-size:12px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.btn{background:var(--o);color:#1a1209;border:0;border-radius:10px;padding:10px 16px;font-weight:500;cursor:pointer}
+.btn:hover{background:var(--o2)}.btn.g{background:var(--p2);color:var(--t);border:1px solid var(--b)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:focus-visible,.nav:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--o2);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pt{display:flex;justify-content:space-between;align-items:center;background:var(--p2);border-radius:10px;padding:9px 12px;margin-bottom:8px;font-size:13px}
+.pt small{color:var(--t2)}.x{background:none;border:0;color:var(--t2);cursor:pointer;font-size:16px}
+.note{border:1px dashed var(--b);border-radius:12px;padding:12px;color:var(--t2);font-size:12.5px;line-height:1.5}
+.tag{font-size:11px;padding:3px 8px;border-radius:99px;background:rgba(72,184,138,.12);color:var(--g)}
+.tag.d{background:rgba(233,184,76,.12);color:var(--y)}.tag.u{background:rgba(219,101,84,.12);color:var(--r)}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.item{background:var(--p2);border:1px solid var(--b);border-radius:14px;padding:14px}.item p{color:var(--t2);margin:8px 0;font-size:13px;line-height:1.5}
+a{color:var(--o2)}label{display:block;color:var(--t2);font-size:12px;margin:10px 0 4px}
+select,input[type=text]{background:var(--p2);border:1px solid var(--b);border-radius:10px;padding:9px 12px}
+.report{background:#fff;color:#1b1b1b;border-radius:12px;padding:28px;line-height:1.55}.report h2{color:#7a3b10;margin:18px 0 6px;font-size:16px}.report h1{font-size:24px}
+.view{display:none}.view.on{display:block}
+@media(max-width:980px){.grid4{grid-template-columns:1fr 1fr}.two,.three{grid-template-columns:1fr}}
+@media(max-width:760px){.app{display:block}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;padding:10px}.logo{width:100%;padding:0 6px}.nav{width:auto;padding:8px 10px;font-size:12px}.nav span{display:none}.sp,.help{display:none}main{padding:16px 14px}.search{width:100%}.grid4{grid-template-columns:1fr}#map{height:340px}}
+@media print{aside,header,.noprint,.view:not(#v-brief){display:none!important}.app{display:block}body,main{background:#fff;padding:0}.report{padding:0}}
+</style></head><body>
+<div class="app">
+<aside id="side" aria-label="Main navigation"></aside>
+<main>
+<header>
+ <div><h1 id="title">Mission Overview</h1><div class="sub" id="crumb">MARSWALK / Workspace</div></div>
+ <div class="tools">
+  <input class="search" id="q" type="text" placeholder="Search regions, coordinates, routes…" aria-label="Search" autocomplete="off">
+  <div class="results" id="res"></div>
+  <span class="chip w">Prototype · demo data</span>
+ </div>
+</header>
+
+<section class="view on" id="v-overview">
+ <div class="sub" style="margin:-10px 0 16px;font-size:13px">Welcome to your Mars exploration workspace.</div>
+ <div class="grid4" id="stats"></div>
+ <div class="two">
+  <div class="card"><h3>Terrain map</h3><div id="mapSlot"></div></div>
+  <div class="card" id="planSlot"></div>
+ </div>
+ <div class="three">
+  <div class="card"><h3>NASA data availability</h3><div id="avail"></div></div>
+  <div class="card"><h3>Recent activity</h3><div id="activity" class="sub" style="font-size:13px"></div></div>
+  <div class="card"><h3>Briefing preview</h3><div id="prev" class="sub" style="font-size:13px"></div><button class="btn g" style="margin-top:12px" data-go="brief">Open briefings</button></div>
+ </div>
+</section>
+
+<section class="view" id="v-explorer">
+ <div class="two">
+  <div class="card"><h3>Mars Explorer</h3><div id="mapSlot2"></div></div>
+  <div class="card"><h3>Layers</h3><div id="layers"></div>
+   <h3 style="margin-top:18px">Selected location</h3><div id="loc" class="sub" style="font-size:13px"></div></div>
+ </div>
+</section>
+
+<section class="view" id="v-route">
+ <div class="two">
+  <div class="card"><h3>Route Planner</h3><div class="sub" style="margin-bottom:10px">Click the map to add points. First = start, last = destination, between = waypoints.</div><div id="mapSlot3"></div></div>
+  <div class="card" id="routePanel"></div>
+ </div>
+</section>
+
+<section class="view" id="v-science">
+ <div class="card">
+  <h3>Science &amp; Discoveries</h3>
+  <div class="note" style="margin-bottom:14px">These are <b>named reference landmarks</b> (IAU feature names with approximate centre coordinates), not instrument observations. CRISM, HiRISE, CTX and MOLA observation records are <b>not integrated yet</b>; use the links to browse the real archives.</div>
+  <div class="row" style="margin-bottom:14px"><label style="margin:0">Category</label><select id="fcat"></select></div>
+  <div class="list" id="sci"></div>
+ </div>
+</section>
+
+<section class="view" id="v-brief">
+ <div class="card">
+  <h3 class="noprint">Mission Briefings</h3>
+  <div class="row noprint" style="margin-bottom:14px">
+   <button class="btn" id="gen">Generate briefing</button>
+   <button class="btn g" id="print">Print / Save as PDF</button>
+   <button class="btn g" id="ejson">Export JSON</button>
+   <button class="btn g" id="ecsv">Export CSV</button>
+  </div>
+  <div id="report"></div>
+ </div>
+</section>
+
+<section class="view" id="v-settings">
+ <div class="card" style="max-width:640px">
+  <h3>Settings</h3>
+  <label>Distance units</label><select id="sUnit"><option value="km">Metric (km)</option><option value="mi">Miles</option></select>
+  <label>Coordinate format</label><select id="sCoord"><option value="dd">Decimal degrees (N/E)</option><option value="dm">Degrees &amp; minutes</option></select>
+  <label>Walking pace (for time estimates)</label><select id="sPace"><option value="2">2 km/h</option><option value="3">3 km/h</option><option value="4">4 km/h</option></select>
+  <div class="note" style="margin-top:18px">Coordinates: planetocentric latitude, east-positive longitude 0–360°. Distances use a spherical Mars, mean radius 3389.5 km. Settings and routes are stored in this browser only.</div>
+  <div class="row" style="margin-top:14px"><button class="btn g" id="wipe">Clear saved routes</button></div>
+ </div>
+</section>
+
+<section class="view" id="v-help">
+ <div class="card" style="max-width:720px"><h3>Help &amp; Documentation</h3>
+  <p class="sub" style="font-size:13px;line-height:1.6">Click the map to place route points. Distance is a great-circle (direct) path on a sphere, not a terrain-aware route. Direct routes are never labelled safe. The map tries to load NASA Trek Mars imagery; if it cannot be reached, a plain latitude/longitude grid is shown instead and everything else keeps working. Elevation along a route comes from a small MOLA grid file (mola_grid.json) that you generate once with make_mola_grid.py; without it, the profile is marked unavailable. CRISM minerals are not integrated yet.</p>
+  <p style="font-size:13px">Sources to explore: <a href="https://trek.nasa.gov/" target="_blank" rel="noopener">NASA Trek</a> · <a href="https://pds.nasa.gov/" target="_blank" rel="noopener">PDS</a> · <a href="https://ode.rsl.wustl.edu/mars/" target="_blank" rel="noopener">Mars ODE</a></p></div>
+</section>
+</main></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const R=3389.5,rad=Math.PI/180;
+
+/* ---- EASY TO CHANGE: the map imagery source ----
+   NASA Trek WMTS, Mars equirectangular (EQ) Viking colour mosaic.
+   If imagery ever stops loading, the app falls back to the plain grid automatically. */
+const TILE_URL='https://trek.nasa.gov/tiles/Mars/EQ/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg';
+
+const MOLA_URL='https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg'; /* colour-shaded elevation relief; check the layer name on trek.nasa.gov/tiles/apidoc/trekAPI.html?body=mars */
+const CRISM_URL=''; /* paste a CRISM mineral-map tile URL here if you find one (same format as above) */
+const GRID_URL='mola_grid.json'; /* small elevation grid made by make_mola_grid.py (see README) */
+const SITES=[
+ {n:'Jezero Crater',lat:18.4,lon:77.6,cat:'Crater / Delta',note:'Crater containing an ancient river delta; landing site of the Perseverance rover.',src:'https://www.usgs.gov/media/images/jezero-crater'},
+ {n:'Gale Crater',lat:-5.4,lon:137.8,cat:'Crater',note:'Crater with a central mound (Aeolis Mons); explored by the Curiosity rover.',src:'https://science.nasa.gov/mission/msl-curiosity/'},
+ {n:'Olympus Mons',lat:18.65,lon:226.2,cat:'Volcano',note:'Shield volcano, among the largest known volcanoes in the solar system.',src:'https://science.nasa.gov/mars/facts/'},
+ {n:'Valles Marineris',lat:-13.9,lon:301,cat:'Canyon',note:'Vast canyon system near the equator; coordinates approximate for the system centre.',src:'https://science.nasa.gov/mars/facts/'},
+ {n:'Hellas Planitia',lat:-42.4,lon:70.5,cat:'Basin',note:'Large impact basin in the southern hemisphere.',src:'https://science.nasa.gov/mars/facts/'},
+ {n:'Gusev Crater',lat:-14.5,lon:175.4,cat:'Crater',note:'Landing site of the Spirit rover.',src:'https://science.nasa.gov/mission/mars-exploration-rovers-spirit-and-opportunity/'}
+];
+const DATA=()=>[
+ ['Surface imagery','Viking colour mosaic via NASA Trek',st.img==='ok'?'Live':st.img==='fail'?'Unreachable':'Loading…',st.img==='ok'?'g':st.img==='fail'?'u':'d'],
+ ['Elevation','MOLA grid + Trek relief',st.grid==='ok'?'Live':st.mola==='ok'?'Map layer only':'Not loaded',st.grid==='ok'?'g':st.mola==='ok'?'d':'u'],
+ ['Minerals','CRISM (MRO)',CRISM_URL?(st.crism==='ok'?'Live':st.crism==='fail'?'Unreachable':'Off'):'Not configured',CRISM_URL&&st.crism==='ok'?'g':'u'],
+ ['Named features','IAU names (reference)','Included, demo','g']
+];
+let st={pts:[],saved:[],unit:'km',coord:'dd',sel:null,layers:{img:true,mola:false,crism:false,grid:true,sites:true,route:true},acts:[],brief:null,img:'loading',mola:'idle',crism:'idle',grid:'idle',pace:3};
+try{const s=JSON.parse(localStorage.getItem('mw')||'null');if(s){st.saved=s.saved||[];st.unit=s.unit||'km';st.coord=s.coord||'dd';st.pace=s.pace||3}}catch(e){}
+const save=()=>{try{localStorage.setItem('mw',JSON.stringify({saved:st.saved,unit:st.unit,coord:st.coord,pace:st.pace}))}catch(e){}};
+const $=id=>document.getElementById(id);
+const hav=(a,b)=>{const dl=(b.lat-a.lat)*rad,dn=(b.lon-a.lon)*rad,x=Math.sin(dl/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
+const dist=km=>st.unit==='km'?km.toFixed(1)+' km':(km*0.621371).toFixed(1)+' mi';
+const fmt=p=>{const a=Math.abs(p.lat),ns=p.lat>=0?'N':'S';if(st.coord==='dm'){const f=(v)=>Math.floor(v)+'° '+((v%1)*60).toFixed(1)+'′';return f(a)+' '+ns+', '+f(p.lon)+' E'}return a.toFixed(3)+'° '+ns+', '+p.lon.toFixed(3)+'° E'};
+const total=()=>st.pts.slice(1).reduce((s,p,i)=>s+hav(st.pts[i],p),0);
+const nearest=p=>SITES.map(s=>({s,d:hav(p,s)})).sort((a,b)=>a.d-b.d)[0];
+const ic=d=>`<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const NAV=[['overview','Overview','<path d="M3 11l9-8 9 8v10H3z"/>'],['explorer','Mars Explorer','<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/>'],['route','Route Planner','<path d="M4 20l16-16M4 20h4M16 4h4v4"/>'],['science','Science & Discoveries','<path d="M9 3v6L4 19h16L15 9V3M8 3h8"/>'],['brief','Mission Briefings','<path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7"/>'],['settings','Settings','<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>'],['help','Help & Documentation','<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 115 0c0 2-2.5 2-2.5 4M12 17h.01"/>']];
+const TITLES={overview:'Mission Overview',explorer:'Mars Explorer',route:'Route Planner',science:'Science & Discoveries',brief:'Mission Briefings',settings:'Settings',help:'Help & Documentation'};
+$('side').innerHTML='<div class="logo">MARSWALK</div>'+NAV.map((n,i)=>(i===5?'<div class="sp"></div>':'')+`<button class="nav" data-go="${n[0]}" title="${n[1]}">${ic(n[2])}<span>${n[1]}</span></button>`).join('')+'<div class="help"><b>Explore Beyond the Horizon.</b><br>Planning tool, not a game. No live telemetry.</div>';
+function go(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('on',b.dataset.go===v));$('title').textContent=TITLES[v];$('crumb').textContent='MARSWALK / '+TITLES[v];const m={overview:'mapSlot',explorer:'mapSlot2',route:'mapSlot3'}[v];if(m){$(m).appendChild($('mapbox'));map.invalidateSize()}render();window.scrollTo(0,0)}
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go)});
+
+/* ================= MAP (Leaflet) =================
+   Leaflet shows longitude -180..180, but MARSWALK stores 0..360 (east-positive).
+   toDisp() converts 0..360 -> -180..180 for drawing. Clicks convert back. */
+const toDisp=lon=>lon>180?lon-360:lon;
+const box=document.createElement('div');box.id='mapbox';
+box.innerHTML='<div class="mapwrap"><div id="map" role="application" aria-label="Mars map, click to select coordinates"></div></div><div class="legend"><span><i class="dot" style="background:var(--o2)"></i>Route</span><span><i class="dot" style="background:var(--g)"></i>Reference landmark</span><span><i class="dot" style="background:#fff"></i>Selected</span><span id="imgstat">Imagery: loading…</span></div>';
+$('mapSlot').appendChild(box);
+
+const map=L.map('map',{crs:L.CRS.EPSG4326,center:[0,0],zoom:1,minZoom:1,maxZoom:9,maxBounds:[[-90,-180],[90,180]],maxBoundsViscosity:1,worldCopyJump:false,attributionControl:true});
+map.attributionControl.setPrefix(false);
+
+/* WMTS level 0 = 2x1 tiles; Leaflet's EPSG4326 zoom 1 = 2x1 tiles, so zoomOffset -1 */
+const tiles=L.tileLayer(TILE_URL,{zoomOffset:-1,minZoom:1,maxNativeZoom:8,maxZoom:9,noWrap:true,bounds:[[-90,-180],[90,180]],attribution:'Imagery: NASA/USGS Viking MDIM2.1 via NASA Trek'});
+tiles.setZIndex(1);
+let loads=0,errs=0;
+function setImg(s){if(st.img===s)return;st.img=s;$('imgstat').textContent=s==='ok'?'Imagery: NASA Trek Viking mosaic':s==='fail'?'Imagery unavailable · plain lat/lon grid':'Imagery: loading…';render()}
+tiles.on('tileload',()=>{loads++;setImg('ok')});
+tiles.on('tileerror',()=>{errs++;if(!loads&&errs>=4)setImg('fail')});
+setTimeout(()=>{if(!loads)setImg('fail')},8000); /* safety: nothing loaded after 8 s */
+/* extra map layers (elevation relief, minerals) use the same recipe as the imagery */
+function overlay(url,key){if(!url)return null;
+ const l=L.tileLayer(url,{zoomOffset:-1,minZoom:1,maxNativeZoom:6,maxZoom:9,noWrap:true,opacity:.7,zIndex:key==='mola'?2:3,bounds:[[-90,-180],[90,180]],attribution:key==='mola'?'Relief: NASA MGS/MOLA via NASA Trek':'Minerals: NASA MRO/CRISM via NASA Trek'});
+ let ok=0,er=0;
+ l.on('tileload',()=>{ok++;if(st[key]!=='ok'){st[key]='ok';render()}});
+ l.on('tileerror',()=>{er++;if(!ok&&er>=4&&st[key]!=='fail'){st[key]='fail';render()}});
+ return l}
+const molaTiles=overlay(MOLA_URL,'mola'),crismTiles=overlay(CRISM_URL,'crism');
+
+const gGrid=L.layerGroup(),gSites=L.layerGroup(),gRoute=L.layerGroup(),gSel=L.layerGroup();
+/* grid is built once */
+for(let lo=-180;lo<=180;lo+=30){L.polyline([[-90,lo],[90,lo]],{color:'#8a7f74',weight:1,opacity:.35,interactive:false}).addTo(gGrid);if(lo<180)L.marker([-84,lo],{interactive:false,icon:L.divIcon({className:'gl',html:(lo<0?lo+360:lo)+'°E',iconSize:[40,14],iconAnchor:[-4,14]})}).addTo(gGrid)}
+for(let la=-60;la<=60;la+=30){L.polyline([[la,-180],[la,180]],{color:la===0?'#b3a79a':'#8a7f74',weight:1,opacity:la===0?.5:.35,interactive:false}).addTo(gGrid);L.marker([la,-180],{interactive:false,icon:L.divIcon({className:'gl',html:la+'°',iconSize:[30,14],iconAnchor:[-4,16]})}).addTo(gGrid)}
+
+/* great-circle path between two points, split where it crosses the ±180° edge */
+function gcSegments(a,b){const d=hav(a,b)/R;if(d<1e-9)return[[[a.lat,toDisp(a.lon)]]];
+ const out=[];let seg=[],prev=null,N=60;
+ for(let k=0;k<=N;k++){const f=k/N,A=Math.sin((1-f)*d)/Math.sin(d),B=Math.sin(f*d)/Math.sin(d);
+  const x=A*Math.cos(a.lat*rad)*Math.cos(a.lon*rad)+B*Math.cos(b.lat*rad)*Math.cos(b.lon*rad),
+        y=A*Math.cos(a.lat*rad)*Math.sin(a.lon*rad)+B*Math.cos(b.lat*rad)*Math.sin(b.lon*rad),
+        z=A*Math.sin(a.lat*rad)+B*Math.sin(b.lat*rad);
+  const la=Math.atan2(z,Math.hypot(x,y))/rad;let lo=Math.atan2(y,x)/rad;if(lo<0)lo+=360;const dl=toDisp(lo);
+  if(prev!==null&&Math.abs(dl-prev)>180){out.push(seg);seg=[]}
+  seg.push([la,dl]);prev=dl}
+ out.push(seg);return out}
+
+/* redraw everything that depends on state (called from render()) */
+function draw(){
+ const show=(layer,on)=>{if(on&&!map.hasLayer(layer))layer.addTo(map);if(!on&&map.hasLayer(layer))map.removeLayer(layer)};
+ show(tiles,st.layers.img);if(molaTiles)show(molaTiles,st.layers.mola);if(crismTiles)show(crismTiles,st.layers.crism);show(gGrid,st.layers.grid);
+ gSites.clearLayers();gRoute.clearLayers();gSel.clearLayers();
+ if(st.layers.sites)SITES.forEach(s=>L.circleMarker([s.lat,toDisp(s.lon)],{radius:5,color:'#48B88A',fillColor:'#48B88A',fillOpacity:1,weight:1,interactive:false}).bindTooltip(s.n,{permanent:true,direction:'right',offset:[6,0],className:'lbl'}).addTo(gSites));
+ if(st.layers.route&&st.pts.length){
+  st.pts.slice(1).forEach((p,i)=>L.polyline(gcSegments(st.pts[i],p),{color:'#F0A45A',weight:3,interactive:false}).addTo(gRoute));
+  st.pts.forEach((p,i)=>L.circleMarker([p.lat,toDisp(p.lon)],{radius:7,color:'#F0A45A',weight:3,fillColor:'#171615',fillOpacity:1,interactive:false}).bindTooltip(i===0?'Start':i===st.pts.length-1?'Dest':'WP'+i,{permanent:true,direction:'right',offset:[8,-6],className:'lbl'}).addTo(gRoute))}
+ if(st.sel)L.circleMarker([st.sel.lat,toDisp(st.sel.lon)],{radius:10,color:'#fff',weight:2,fill:false,interactive:false}).addTo(gSel);
+ gSites.addTo(map);gRoute.addTo(map);gSel.addTo(map)}
+
+map.on('click',e=>{
+ const lat=Math.max(-90,Math.min(90,e.latlng.lat)),lon=((e.latlng.lng%360)+360)%360;
+ const p={lat:+lat.toFixed(3),lon:+lon.toFixed(3)};st.sel=p;
+ if($('v-route').classList.contains('on')||$('v-overview').classList.contains('on')){st.pts.push(p);st.acts.unshift('Added point '+st.pts.length+' at '+fmt(p));st.acts=st.acts.slice(0,5)}
+ render()});
+
+/* ================= elevation (MOLA grid) ================= */
+const fmtH=h=>{const m=Math.round(h*60);return m>=60?Math.floor(m/60)+' h '+(m%60)+' min':m+' min'};
+let GRIDINFO=null,GRID=null;
+fetch(GRID_URL).then(r=>{if(!r.ok)throw 0;return r.json()}).then(j=>{GRIDINFO=j;GRID=j.data;st.grid='ok';render()}).catch(()=>{st.grid='fail';render()});
+/* grid cell (row i, col j): centre lat = 90-(i+.5)*step, centre lon = (j+.5)*step (0..360). Heights in metres; null = no data. */
+function elevAt(lat,lon){const s=GRIDINFO.step,nx=GRIDINFO.nx,ny=GRIDINFO.ny;let x=lon/s-.5,y=(90-lat)/s-.5;y=Math.max(0,Math.min(ny-1,y));
+ const x0=Math.floor(x),y0=Math.floor(y),fx=x-x0,fy=y-y0;let sum=0,wt=0;
+ for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){const v=GRID[Math.min(ny-1,y0+dy)*nx+(((x0+dx)%nx)+nx)%nx];if(v===null||v===undefined)continue;const w=(dx?fx:1-fx)*(dy?fy:1-fy);sum+=v*w;wt+=w}
+ return wt>0?sum/wt:null}
+function gcPoint(a,b,f){const d=hav(a,b)/R;if(d<1e-9)return{lat:a.lat,lon:a.lon};const A=Math.sin((1-f)*d)/Math.sin(d),B=Math.sin(f*d)/Math.sin(d);
+ const x=A*Math.cos(a.lat*rad)*Math.cos(a.lon*rad)+B*Math.cos(b.lat*rad)*Math.cos(b.lon*rad),y=A*Math.cos(a.lat*rad)*Math.sin(a.lon*rad)+B*Math.cos(b.lat*rad)*Math.sin(b.lon*rad),z=A*Math.sin(a.lat*rad)+B*Math.sin(b.lat*rad);
+ return{lat:Math.atan2(z,Math.hypot(x,y))/rad,lon:(Math.atan2(y,x)/rad+360)%360}}
+function profile(){if(st.grid!=='ok'||st.pts.length<2)return null;
+ const raw=[];let cum=0;
+ for(let i=1;i<st.pts.length;i++){const a=st.pts[i-1],b=st.pts[i],L=hav(a,b),m=Math.max(1,Math.ceil(L/15));
+  for(let k=(i===1?0:1);k<=m;k++){const q=gcPoint(a,b,k/m);raw.push({d:cum+L*k/m,e:elevAt(q.lat,q.lon)})}cum+=L}
+ const sm=raw.filter(q=>q.e!==null);if(sm.length<2)return null;
+ let min=1e9,max=-1e9,up=0,down=0,maxg=0;
+ sm.forEach((q,i)=>{min=Math.min(min,q.e);max=Math.max(max,q.e);if(i){const dz=q.e-sm[i-1].e,dd=(q.d-sm[i-1].d)*1000;if(dz>0)up+=dz;else down-=dz;if(dd>0)maxg=Math.max(maxg,Math.atan(Math.abs(dz)/dd)/rad)}});
+ return{s:sm,min,max,up,down,maxg,km:cum,step:cum/(sm.length-1||1)}}
+function profHTML(){
+ if(st.grid==='idle')return '<div class="note" style="margin:10px 0">Loading elevation grid…</div>';
+ if(st.grid==='fail')return '<div class="note" style="margin:10px 0"><b>Elevation profile:</b> unavailable. <code>mola_grid.json</code> was not found next to this page; see the README for the one-time step to create it.<br><b>Terrain:</b> unknown. A straight line is not a safe route.</div>';
+ const p=profile();if(!p)return '<div class="note" style="margin:10px 0">No elevation data under this route.</div>';
+ const lv=p.maxg>=10?['u','High']:p.maxg>=5?['d','Moderate']:['','Low'];
+ return `<div style="margin:10px 0"><div class="sub" style="margin-bottom:6px">Elevation profile (MOLA, ${GRIDINFO.step}° grid)</div><canvas id="prof" width="640" height="220" style="width:100%;height:auto;cursor:default" role="img" aria-label="Elevation profile along the route"></canvas>
+ <div class="pt" style="margin-top:8px"><span>Elevation range<br><small>${Math.round(p.min)} to ${Math.round(p.max)} m</small></span><span style="text-align:right">Climb / descent<br><small>+${Math.round(p.up)} m / −${Math.round(p.down)} m</small></span></div>
+ <div class="pt"><span>Steepest regional gradient<br><small>${p.maxg.toFixed(1)}° between samples ~${Math.round(p.step)} km apart</small></span><span class="tag ${lv[0]}">${lv[1]}</span></div>
+ <div class="pt"><span>Walking time<br><small>≈ ${fmtH(p.km/st.pace)} at ${st.pace} km/h (assumed pace, flat ground)</small></span></div>
+ <div class="note">Heights are averaged over a coarse grid: local slopes, boulders and small craters are not captured, so this is not a safe-route check.</div></div>`}
+function drawProfile(){const c=$('prof');if(!c)return;const p=profile();if(!p)return;
+ const x=c.getContext('2d'),W=c.width,H=c.height,pl=70,pb=28,pt=10,pr=12;x.clearRect(0,0,W,H);
+ const lo=Math.floor(p.min/500)*500,hi=Math.max(lo+500,Math.ceil(p.max/500)*500),sx=d=>pl+d/p.km*(W-pl-pr),sy=e=>pt+(hi-e)/(hi-lo)*(H-pt-pb);
+ x.font='14px DM Sans';x.lineWidth=1;
+ for(let i=0;i<=4;i++){const e=lo+(hi-lo)*i/4,y=sy(e);x.strokeStyle='#38332E';x.beginPath();x.moveTo(pl,y);x.lineTo(W-pr,y);x.stroke();x.fillStyle='#9B9288';x.textAlign='left';x.fillText(Math.round(e)+' m',4,y+4)}
+ x.fillStyle='#9B9288';x.textAlign='left';x.fillText('0',pl,H-8);x.textAlign='right';x.fillText(dist(p.km),W-pr,H-8);x.textAlign='left';
+ const path=()=>{x.beginPath();p.s.forEach((q,i)=>i?x.lineTo(sx(q.d),sy(q.e)):x.moveTo(sx(q.d),sy(q.e)))};
+ path();x.lineTo(sx(p.s[p.s.length-1].d),H-pb);x.lineTo(sx(0),H-pb);x.closePath();x.fillStyle='rgba(228,154,81,.18)';x.fill();
+ path();x.strokeStyle='#F0A45A';x.lineWidth=2.5;x.stroke()}
+function terrainText(){const p=profile();return p?`MOLA grid elevation along the route ranges from ${Math.round(p.min)} to ${Math.round(p.max)} m, with about ${Math.round(p.up)} m of total climb and ${Math.round(p.down)} m of descent. Steepest regional gradient is about ${p.maxg.toFixed(1)}° (coarse ${GRIDINFO.step}° grid; local slopes and hazards are not captured).`:'None available. No elevation data was used; map imagery is for visual orientation only.'}
+
+/* ================= renders ================= */
+function planHTML(){const t=st.pts.length>1;const s=st.pts[0],d=st.pts[st.pts.length-1];
+ return `<h3>Mission planning</h3><div class="pt"><span>Start<br><small>${s?fmt(s):'Click map to set'}</small></span></div>
+ <div class="pt"><span>Destination<br><small>${t?fmt(d):'Add a second point'}</small></span></div>
+ <div class="pt"><span>Route type<br><small>${t?'Direct route (great-circle)':'None'}</small></span>${t?'<span class="tag d">Terrain unknown</span>':''}</div>
+ <div class="pt"><span>Distance<br><small>${t?dist(total()):'–'}</small></span></div>
+ <div class="pt"><span>Science stops<br><small>${t?nearbyList().length+' landmark(s) within 500 km':'–'}</small></span></div>
+ <div class="row"><button class="btn" data-go="route">Open route planner</button><button class="btn g" id="clr1">Clear</button></div>
+ <div class="sub" style="margin:14px 0 6px">Try an example route</div><div class="row"><button class="btn g" data-ex="Olympus Mons>Valles Marineris">Olympus → Valles Marineris</button><button class="btn g" data-ex="Jezero Crater>Hellas Planitia">Jezero → Hellas</button></div>`}
+function nearbyList(){const out=[];SITES.forEach(s=>{let m=1e9;st.pts.forEach((p,i)=>{m=Math.min(m,hav(p,s));if(i){const a=st.pts[i-1];for(let k=1;k<20;k++){const f=k/20;m=Math.min(m,hav({lat:a.lat+(p.lat-a.lat)*f,lon:a.lon+(p.lon-a.lon)*f},s))}}});if(m<=500)out.push({s,d:m})});return out}
+function routePanel(){const t=st.pts.length>1;
+ let h='<h3>Route details</h3>'+(st.pts.length?st.pts.map((p,i)=>`<div class="pt"><span>${i===0?'Start':i===st.pts.length-1&&t?'Destination':'Waypoint '+i}<br><small>${fmt(p)}</small></span><button class="x" data-rm="${i}" aria-label="Remove point">✕</button></div>`).join(''):'<div class="note">No points yet. Click the map.</div>');
+ if(t){h+=`<div class="pt"><span>Total distance<br><small>${dist(total())} · spherical, R=3389.5 km</small></span><span class="tag d">Direct route</span></div>
+ ${profHTML()}`;
+ const n=nearbyList();h+='<div class="sub" style="margin:10px 0 6px">Reference landmarks within 500 km</div>'+(n.length?n.map(x=>`<div class="pt"><span>${x.s.n}<br><small>${x.d.toFixed(0)} km from route</small></span></div>`).join(''):'<div class="sub">None within 500 km.</div>')}
+ h+=`<div class="row" style="margin-top:12px"><button class="btn" id="sv" ${t?'':'disabled'}>Save route</button><button class="btn g" id="clr2">Clear</button><button class="btn g" id="mk" ${t?'':'disabled'}>Make briefing</button></div>`;
+ h+='<h3 style="margin-top:20px">Saved routes</h3>'+(st.saved.length?st.saved.map((r,i)=>`<div class="pt"><span>${r.name}<br><small>${r.pts.length} pts · ${dist(r.km)}</small></span><span><button class="x" data-ld="${i}">Load</button><button class="x" data-dl="${i}">✕</button></span></div>`).join(''):'<div class="sub">None saved.</div>');
+ return h}
+function render(){
+ const live=(st.img==='ok'?1:0)+((st.grid==='ok'||st.mola==='ok')?1:0)+(st.crism==='ok'?1:0);
+ $('stats').innerHTML=[['Active region',st.sel?nearest(st.sel).s.n:'None selected','Nearest named landmark to selection'],['NASA data layers',live+' of 4 live',live?'See the availability card for details':'Adapters pending in this prototype'],['Saved routes',st.saved.length,'Stored in this browser'],['Reference features',SITES.length,'Named landmarks, not observations']].map(c=>`<div class="card stat"><div class="l">${c[0]}</div><div class="v">${c[1]}</div><div class="d">${c[2]}</div></div>`).join('');
+ $('planSlot').innerHTML=planHTML();
+ $('avail').innerHTML=DATA().map(d=>`<div class="pt"><span>${d[0]}<br><small>${d[1]}</small></span><span class="tag ${d[3]==='g'?'':d[3]}">${d[2]}</span></div>`).join('');
+ $('activity').innerHTML=st.acts.length?st.acts.map(a=>'• '+a).join('<br>'):'No activity yet this session.';
+ $('prev').innerHTML=st.pts.length>1?`Route with ${st.pts.length} points, ${dist(total())}. Generate a full briefing from the Briefings page.`:'No route yet. Create one to preview a briefing.';
+ $('layers').innerHTML=[['img','Surface imagery (Viking mosaic)','img'],['mola','Elevation relief (MOLA, colour shaded)','mola'],['crism','Minerals (CRISM)','crism'],['grid','Coordinate grid'],['sites','Reference landmarks'],['route','Exploration routes']].map(l=>{const k=l[2],off=k==='crism'&&!CRISM_URL;return `<label style="display:flex;gap:10px;align-items:center;color:var(--t);margin:6px 0"><input type="checkbox" data-ly="${l[0]}" ${st.layers[l[0]]?'checked':''} ${off?'disabled':''}>${l[1]}${off?' <span class="tag u">not configured</span>':k&&st[k]==='fail'&&st.layers[l[0]]?' <span class="tag u">unreachable</span>':''}</label>`}).join('')+`<div class="sub" style="margin-top:8px">Route elevation numbers come from a small MOLA grid file (${st.grid==='ok'?'loaded':'mola_grid.json not found'}).</div>`;
+ $('loc').innerHTML=st.sel?`${fmt(st.sel)}<br>Nearest landmark: ${nearest(st.sel).s.n} (${nearest(st.sel).d.toFixed(0)} km)<br><div class="row" style="margin-top:10px"><button class="btn g" id="addsel">Add to route</button></div>`:'Click the map to select a location.';
+ $('routePanel').innerHTML=routePanel();drawProfile();
+ const cats=[...new Set(SITES.map(s=>s.cat))],fc=$('fcat'),cur=fc.value||'All';fc.innerHTML=['All',...cats].map(c=>`<option ${c===cur?'selected':''}>${c}</option>`).join('');
+ $('sci').innerHTML=SITES.filter(s=>cur==='All'||s.cat===cur).map(s=>`<div class="item"><div class="row" style="justify-content:space-between"><b class="h">${s.n}</b><span class="tag d">Reference</span></div><div class="sub">${s.cat} · ${fmt(s)}</div><p>${s.note}</p><div class="row"><a href="${s.src}" target="_blank" rel="noopener">Source</a><button class="btn g" data-show="${s.n}">Show on map</button></div></div>`).join('')||'<div class="sub">No results.</div>';
+ $('sUnit').value=st.unit;$('sCoord').value=st.coord;$('sPace').value=st.pace;draw()}
+document.addEventListener('click',e=>{const t=e.target;
+ if(t.dataset.rm){st.pts.splice(+t.dataset.rm,1);render()}
+ if(t.id==='clr1'||t.id==='clr2'){st.pts=[];st.sel=null;render()}
+ if(t.id==='sv'){const n=nearest(st.pts[0]).s.n+' → '+nearest(st.pts[st.pts.length-1]).s.n;st.saved.push({name:n,pts:st.pts.slice(),km:total()});st.acts.unshift('Saved route '+n);save();render()}
+ if(t.dataset.ld){st.pts=st.saved[+t.dataset.ld].pts.slice();render()}
+ if(t.dataset.dl){st.saved.splice(+t.dataset.dl,1);save();render()}
+ if(t.id==='addsel'&&st.sel){st.pts.push(st.sel);render()}
+ if(t.dataset.show){const s=SITES.find(x=>x.n===t.dataset.show);st.sel={lat:s.lat,lon:s.lon};go('explorer');map.setView([s.lat,toDisp(s.lon)],Math.max(map.getZoom(),3))}
+ if(t.id==='mk'){go('brief');genBrief()}
+ if(t.id==='wipe'){st.saved=[];save();render()}
+ if(t.dataset.ex){const [a,b]=t.dataset.ex.split('>').map(n=>SITES.find(x=>x.n===n));st.pts=[{lat:a.lat,lon:a.lon},{lat:b.lat,lon:b.lon}];st.sel=null;st.acts.unshift('Loaded example route: '+a.n+' → '+b.n);go('route');map.fitBounds(st.pts.map(p=>[p.lat,toDisp(p.lon)]),{padding:[30,30]})}});
+document.addEventListener('change',e=>{const t=e.target;
+ if(t.dataset.ly){st.layers[t.dataset.ly]=t.checked;draw()}
+ if(t.id==='fcat')render();
+ if(t.id==='sUnit'){st.unit=t.value;save();render()}
+ if(t.id==='sCoord'){st.coord=t.value;save();render()}
+ if(t.id==='sPace'){st.pace=+t.value;save();render()}});
+
+/* search */
+$('q').addEventListener('input',e=>{const v=e.target.value.trim().toLowerCase(),r=$('res');if(!v){r.style.display='none';return}
+ let h='';const m=v.match(/^(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)$/);
+ if(m&&Math.abs(+m[1])<=90&&+m[2]>=-180&&+m[2]<=360)h+=`<button data-pt="${m[1]},${m[2]}">Coordinates ${m[1]}, ${m[2]}</button>`;
+ SITES.filter(s=>s.n.toLowerCase().includes(v)||s.cat.toLowerCase().includes(v)).forEach(s=>h+=`<button data-show="${s.n}">${s.n} <small style="color:var(--t2)">${s.cat}</small></button>`);
+ st.saved.filter(x=>x.name.toLowerCase().includes(v)).forEach((x,i)=>h+=`<button data-ld="${st.saved.indexOf(x)}">Saved route: ${x.name}</button>`);
+ r.innerHTML=h||'<div style="padding:12px;color:var(--t2)">No matches. Try a crater name or "18.4, 77.6".</div>';r.style.display='block'});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pt]');if(b){const [la,lo]=b.dataset.pt.split(',').map(Number);st.sel={lat:la,lon:(lo+360)%360};go('explorer');map.setView([la,toDisp(st.sel.lon)],Math.max(map.getZoom(),3))}
+ if(!e.target.closest('.tools'))$('res').style.display='none';else if(e.target.closest('.results'))$('res').style.display='none'});
+
+/* briefing */
+function genBrief(){
+ if(st.pts.length<2){$('report').innerHTML='<div class="note">Create a route with at least two points first (Route Planner).</div>';st.brief=null;return}
+ const s=st.pts[0],d=st.pts[st.pts.length-1],n=nearbyList(),date=new Date().toISOString().slice(0,10);
+ st.brief={title:`Direct route: ${nearest(s).s.n} area to ${nearest(d).s.n} area`,date,start:s,dest:d,waypoints:st.pts.slice(1,-1),km:+total().toFixed(2),nearby:n.map(x=>({name:x.s.n,km:+x.d.toFixed(0)})),elevation:(()=>{const p=profile();return p?{min_m:Math.round(p.min),max_m:Math.round(p.max),climb_m:Math.round(p.up),descent_m:Math.round(p.down),max_regional_gradient_deg:+p.maxg.toFixed(1)}:null})()};
+ $('report').innerHTML=`<div class="report"><h1>${st.brief.title}</h1><div>Generated ${date} · MARSWALK prototype</div>
+ <h2>Objective</h2>Demonstration planning briefing for a direct route. Not an operational plan.
+ <h2>Start / Destination</h2>${fmt(s)} → ${fmt(d)}
+ <h2>Route overview</h2>Direct great-circle path, ${dist(st.brief.km)}, spherical Mars (R = 3389.5 km). Waypoints: ${st.brief.waypoints.length?st.brief.waypoints.map(fmt).join('; '):'none'}.
+ <h2>Terrain observations</h2>${terrainText()}
+ <h2>Reference landmarks within 500 km</h2>${n.length?n.map(x=>`${x.s.n} (${x.d.toFixed(0)} km)`).join('; '):'None'}. These are named features, not instrument observations.
+ <h2>Data sources</h2>Named feature coordinates are approximate IAU/NASA reference values. Map imagery (when loaded): Viking MDIM 2.1 colour mosaic via NASA Trek. Elevation (when loaded): MGS MOLA gridded topography (PDS / USGS), downsampled. Archives for future integration: PDS, Mars ODE (CRISM).
+ <h2>Limitations &amp; uncertainties</h2>Terrain, slope, hazards, and data resolution are unknown. A straight line is not a safe route. Do not use for real mission decisions.</div>`}
+function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()}
+$('gen').onclick=genBrief;$('print').onclick=()=>{if(!st.brief)genBrief();if(st.brief)window.print()};
+$('ejson').onclick=()=>{if(!st.brief)genBrief();if(st.brief)dl('marswalk-route.json',JSON.stringify(st.brief,null,2),'application/json')};
+$('ecsv').onclick=()=>{if(!st.brief)genBrief();if(!st.brief)return;dl('marswalk-route.csv','index,role,lat,lon\n'+st.pts.map((p,i)=>`${i},${i===0?'start':i===st.pts.length-1?'destination':'waypoint'},${p.lat},${p.lon}`).join('\n'),'text/csv')};
+go('overview');
+</script></body></html>
