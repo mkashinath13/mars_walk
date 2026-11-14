@@ -86,6 +86,8 @@ mars_walk/
 
 ## Challenge and credits
 
+Note: Super Intelligence (SI) / Large Language Model tools were utilized during the development of this project to assist with code formatting, documentation structuring, and technical writing refinement.
+
 Created for the [NASA Space Apps Challenge](https://www.spaceappschallenge.org/) challenge **“Interplanetary Survival Guide: Martian Map.”**
 
 - [NASA Trek](https://trek.nasa.gov/) — Mars map and planetary data viewer
