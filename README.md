@@ -16,7 +16,7 @@ Built for the **NASA Space Apps Challenge 2026** · *Interplanetary Survival Gui
 
 ## About
 
-MARSWALK is a browser-based Mars route-planning prototype. Choose a starting point, add waypoints, and set a destination on a Mars map. Explore a coarse elevation profile and create a mission briefing to help understand the route.
+MARSWALK is a browser-based Mars route-planning prototype. Choose a starting point, add waypoints, and set a destination on a Mars map. Explore a coarse elevation profile and create a mission briefing that communicates key route metrics transparently.
 
 > **Important:** MARSWALK is an educational exploration tool—not a navigation system or safety assessment. A direct route is not necessarily traversable or safe.
 
@@ -34,6 +34,24 @@ MARSWALK is a browser-based Mars route-planning prototype. Choose a starting poi
 ## Try the live project
 
 Open **[mkashinath13.github.io/mars_walk](https://mkashinath13.github.io/mars_walk/)** in your browser. No installation or account is required.
+
+## Screenshots
+
+<div align="center">
+
+<img src="previews/dashboard.png" alt="MARSWALK dashboard overview" width="900">
+
+<em>Mission dashboard overview</em>
+
+<img src="previews/routeplanner.png" alt="MARSWALK route planner" width="900">
+
+<em>Route planning and waypoint selection</em>
+
+<img src="previews/mola.png" alt="MOLA elevation profile" width="900">
+
+<em>Regional MOLA elevation profile and elevation context</em>
+
+</div>
 
 ## Run locally
 
